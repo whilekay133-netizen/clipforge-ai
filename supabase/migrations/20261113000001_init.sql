@@ -23,6 +23,7 @@ create type public.subscription_status as enum ('active', 'past_due', 'cancelled
 -- =========================================================
 create or replace function public.touch_updated_at() returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end $$;
+alter function public.touch_updated_at() set search_path = public;
 
 -- =========================================================
 -- Plans
@@ -102,6 +103,7 @@ create index credit_transactions_user_idx on public.credit_transactions (user_id
 -- The ledger is immutable.
 create or replace function public.block_ledger_mutation() returns trigger language plpgsql as $$
 begin raise exception 'credit_transactions is append-only'; end $$;
+alter function public.block_ledger_mutation() set search_path = public;
 create trigger credit_transactions_immutable before update or delete on public.credit_transactions
   for each row execute function public.block_ledger_mutation();
 
@@ -175,6 +177,7 @@ create table public.generations (
 );
 create index generations_project_idx on public.generations (project_id, created_at desc);
 create index generations_status_idx on public.generations (status, created_at desc);
+create index generations_user_idx on public.generations (user_id, created_at desc);
 create trigger generations_touch before update on public.generations for each row execute function public.touch_updated_at();
 
 create table public.scenes (
@@ -194,6 +197,7 @@ create table public.scenes (
   updated_at timestamptz not null default now(),
   unique (project_id, scene_number)
 );
+create index scenes_user_idx on public.scenes (user_id);
 create trigger scenes_touch before update on public.scenes for each row execute function public.touch_updated_at();
 
 create table public.assets (
@@ -207,6 +211,7 @@ create table public.assets (
   created_at timestamptz not null default now()
 );
 create index assets_user_idx on public.assets (user_id, asset_type);
+create index assets_project_idx on public.assets (project_id);
 
 -- =========================================================
 -- Payments, notifications, audit, settings, contact
@@ -352,6 +357,7 @@ end $$;
 revoke all on function public.reserve_credits(uuid, integer, text, text) from public, anon, authenticated;
 revoke all on function public.settle_credits(uuid, integer, integer, text, text) from public, anon, authenticated;
 revoke all on function public.grant_credits(uuid, integer, public.credit_tx_type, text, text) from public, anon, authenticated;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 grant execute on function public.reserve_credits(uuid, integer, text, text) to service_role;
 grant execute on function public.settle_credits(uuid, integer, integer, text, text) to service_role;
 grant execute on function public.grant_credits(uuid, integer, public.credit_tx_type, text, text) to service_role;
@@ -376,22 +382,22 @@ alter table public.contact_messages enable row level security;
 
 create policy "plans readable" on public.plans for select using (is_active);
 
-create policy "own profile read" on public.profiles for select using (auth.uid() = id);
-create policy "own profile update" on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
+create policy "own profile read" on public.profiles for select using ((select auth.uid()) = id);
+create policy "own profile update" on public.profiles for update using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
 -- users may only change these columns directly
 revoke update on public.profiles from authenticated;
 grant update (full_name, avatar_url) on public.profiles to authenticated;
 
-create policy "own wallet" on public.credit_wallets for select using (auth.uid() = user_id);
-create policy "own ledger" on public.credit_transactions for select using (auth.uid() = user_id);
-create policy "own subscriptions" on public.subscriptions for select using (auth.uid() = user_id);
-create policy "own projects" on public.projects for select using (auth.uid() = user_id);
-create policy "own generations" on public.generations for select using (auth.uid() = user_id);
-create policy "own scenes" on public.scenes for select using (auth.uid() = user_id);
-create policy "own assets" on public.assets for select using (auth.uid() = user_id);
-create policy "own payments" on public.payments for select using (auth.uid() = user_id);
-create policy "own notifications read" on public.notifications for select using (auth.uid() = user_id);
-create policy "own notifications update" on public.notifications for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own wallet" on public.credit_wallets for select using ((select auth.uid()) = user_id);
+create policy "own ledger" on public.credit_transactions for select using ((select auth.uid()) = user_id);
+create policy "own subscriptions" on public.subscriptions for select using ((select auth.uid()) = user_id);
+create policy "own projects" on public.projects for select using ((select auth.uid()) = user_id);
+create policy "own generations" on public.generations for select using ((select auth.uid()) = user_id);
+create policy "own scenes" on public.scenes for select using ((select auth.uid()) = user_id);
+create policy "own assets" on public.assets for select using ((select auth.uid()) = user_id);
+create policy "own payments" on public.payments for select using ((select auth.uid()) = user_id);
+create policy "own notifications read" on public.notifications for select using ((select auth.uid()) = user_id);
+create policy "own notifications update" on public.notifications for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 revoke update on public.notifications from authenticated;
 grant update (is_read) on public.notifications to authenticated;
 create policy "anyone can send contact" on public.contact_messages for insert to anon, authenticated with check (true);
@@ -405,4 +411,4 @@ values ('media', 'media', false, 524288000)
 on conflict (id) do nothing;
 
 create policy "users read own media" on storage.objects for select to authenticated
-  using (bucket_id = 'media' and (storage.foldername(name))[1] = 'users' and (storage.foldername(name))[2] = auth.uid()::text);
+  using (bucket_id = 'media' and (storage.foldername(name))[1] = 'users' and (storage.foldername(name))[2] = (select auth.uid())::text);
