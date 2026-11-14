@@ -45,3 +45,34 @@ body { background: var(--color-bg); color: var(--color-fg); }
   animation: shimmer 1.4s infinite;
 }
 @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
+
+/* ---------- Motion system ---------- */
+@keyframes marquee-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@keyframes kenburns { from { transform: scale(1.05) translate(0, 0); } to { transform: scale(1.18) translate(-3%, -2%); } }
+@keyframes drift-slow { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes twinkle { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes wavebar { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+@keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@keyframes rise { from { transform: translateY(0); opacity: 0; } 15% { opacity: .8; } to { transform: translateY(-120px); opacity: 0; } }
+@keyframes caption-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.animate-marquee-left { animation: marquee-left 60s linear infinite; }
+.animate-marquee-right { animation: marquee-right 70s linear infinite; }
+.animate-kenburns { animation: kenburns 8s ease-in-out infinite alternate; }
+.animate-drift { animation: drift-slow 30s linear infinite; }
+.animate-drift-fast { animation: drift-slow 14s linear infinite; }
+.animate-twinkle { animation: twinkle 2.6s ease-in-out infinite; }
+.animate-bob { animation: bob 3s ease-in-out infinite; }
+.animate-wavebar { animation: wavebar 1s ease-in-out infinite; transform-origin: bottom; }
+.animate-scan { animation: scan 3s linear infinite; }
+.animate-pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+.animate-rise { animation: rise 6s ease-in infinite; }
+.animate-caption { animation: caption-in .5s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-left, .animate-marquee-right, .animate-kenburns, .animate-drift, .animate-drift-fast,
+  .animate-twinkle, .animate-bob, .animate-wavebar, .animate-scan, .animate-pulse-dot, .animate-rise { animation: none; }
+}

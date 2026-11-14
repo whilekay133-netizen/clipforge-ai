@@ -7,6 +7,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/misc";
 import { ProjectCard } from "@/components/dashboard/project-card";
+import { FilmStrip } from "@/components/motion/film-strip";
+import { LivePlayer } from "@/components/motion/live-player";
 
 export default async function DashboardPage() {
   const { profile, supabase } = await getSessionProfile();
@@ -32,13 +34,17 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="relative overflow-hidden rounded-3xl border border-brand/30 bg-gradient-to-br from-brand/20 via-surface to-surface p-7 md:p-9">
+        <FilmStrip rows={1} className="absolute inset-x-0 bottom-0 opacity-15" />
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
           <div>
             <p className="text-sm text-brand-soft">{planName} plan</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">Welcome back, {firstName}</h1>
             <p className="mt-2 max-w-lg text-sm text-muted">Describe your next video and we&apos;ll handle the script, scenes, voiceover and render.</p>
           </div>
-          <Link href="/dashboard/create" className={buttonVariants({ size: "lg" })}><Plus className="h-5 w-5" /> Create video</Link>
+          <div className="flex items-center gap-6">
+            <div className="hidden w-64 lg:block"><LivePlayer aspectRatio="16:9" showControls={false} label="Your next video" /></div>
+            <Link href="/dashboard/create" className={buttonVariants({ size: "lg" })}><Plus className="h-5 w-5" /> Create video</Link>
+          </div>
         </div>
       </div>
 

@@ -3,6 +3,8 @@ import { ArrowRight, BookOpen, Captions, Clapperboard, Download, GraduationCap, 
 import { buttonVariants } from "@/components/ui/button";
 import { ProductPreview } from "@/components/marketing/product-preview";
 import { FAQS } from "@/components/marketing/faq-data";
+import { FilmStrip } from "@/components/motion/film-strip";
+import { LivePlayer } from "@/components/motion/live-player";
 
 const steps = [
   { icon: PenLine, title: "Describe", text: "Type a topic, a story or a detailed brief. Let Claude polish it if you like." },
@@ -33,6 +35,8 @@ export default function HomePage() {
     <>
       <section className="relative overflow-hidden">
         <div className="bg-grid absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)]" />
+        <FilmStrip rows={2} className="absolute inset-x-[-10%] top-20 opacity-60 [mask-image:linear-gradient(to_bottom,black_30%,transparent_90%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(55%_45%_at_50%_28%,rgb(6_7_15/0.92),rgb(6_7_15/0.35))]" />
         <div className="glow absolute inset-0" />
         <div className="relative mx-auto max-w-6xl px-5 pb-20 pt-20 text-center md:pt-28">
           <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs text-brand-soft">
@@ -84,6 +88,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="relative overflow-hidden border-t border-border/60 py-24">
+        <div className="mx-auto max-w-6xl px-5">
+          <SectionTitle eyebrow="Every format" title="One brief. Shorts, posts and widescreen." />
+          <div className="mt-12 flex flex-wrap items-end justify-center gap-6">
+            <div className="w-44 md:w-52"><LivePlayer aspectRatio="9:16" label="Shorts · TikTok · Reels" showControls={false}
+              scenes={[{ variant: "forest", caption: "Did you know fireflies talk in light?" }, { variant: "space", caption: "Here are 5 facts that sound fake…" }, { variant: "desert", caption: "Follow for part two." }]} /></div>
+            <div className="w-56 md:w-64"><LivePlayer aspectRatio="1:1" label="Instagram · LinkedIn" showControls={false}
+              scenes={[{ variant: "city", caption: "Launching today: the smart bottle." }, { variant: "ocean", caption: "Track every sip, effortlessly." }, { variant: "dusk", caption: "Pre-order now." }]} /></div>
+            <div className="w-full max-w-md"><LivePlayer aspectRatio="16:9" label="YouTube · 1080p"
+              scenes={[{ variant: "desert", caption: "In 1450, a city of bronze rose in the forest…" }, { variant: "dusk", caption: "Its guilds guarded secrets for centuries." }, { variant: "forest", caption: "This is the story of Benin's master casters." }]} /></div>
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-border/60 py-24">
         <div className="mx-auto max-w-6xl px-5">
           <SectionTitle eyebrow="Features" title="Everything between the idea and the upload" />
@@ -115,9 +133,10 @@ export default function HomePage() {
 
       <section className="px-5 pb-24">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-brand/30 bg-gradient-to-br from-brand/25 via-surface to-surface px-8 py-16 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Your next video is one prompt away</h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted">Sign up free, get 100 credits and make your first video today.</p>
-          <Link href="/register" className={buttonVariants({ size: "lg", className: "mt-8" })}>Start creating <ArrowRight className="h-4 w-4" /></Link>
+          <FilmStrip rows={1} className="absolute inset-x-0 bottom-0 opacity-20" />
+          <h2 className="relative text-3xl font-semibold tracking-tight md:text-4xl">Your next video is one prompt away</h2>
+          <p className="relative mx-auto mt-3 max-w-xl text-muted">Sign up free, get 100 credits and make your first video today.</p>
+          <Link href="/register" className={buttonVariants({ size: "lg", className: "relative mt-8" })}>Start creating <ArrowRight className="h-4 w-4" /></Link>
         </div>
       </section>
     </>
