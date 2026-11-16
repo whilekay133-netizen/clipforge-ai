@@ -21,6 +21,7 @@ export function integrationStatus() {
     supabase: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY),
     anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
     fal: Boolean(process.env.FAL_KEY),
+    stock: Boolean(process.env.PEXELS_API_KEY && process.env.GITHUB_DISPATCH_TOKEN),
     paystack: Boolean(process.env.PAYSTACK_SECRET_KEY),
     inngest: Boolean(process.env.INNGEST_EVENT_KEY) || process.env.NODE_ENV !== "production",
   };

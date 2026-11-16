@@ -2,7 +2,7 @@ import "server-only";
 import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { providers } from "@/lib/providers";
+import { providers, videoBackend } from "@/lib/providers";
 import { MODES, VIDEO_CAPABILITIES } from "@/lib/catalog";
 import { wordsToCues } from "@/lib/subtitles";
 import { BUCKET, copyRemoteToStorage, paths, uploadBytes } from "@/lib/storage";
@@ -47,6 +47,7 @@ export const generateVideo = inngest.createFunction(
     const settings = project.settings as ProjectSettings;
     const mode = MODES.find((m) => m.id === project.mode)!;
     const stylePrefix = `${settings.style} style.`;
+    const stock = videoBackend() === "stock"; // stock backend: voice + subtitles are produced inside the render job
 
     // ---------- 1. Script & scene plan ----------
     if (mode.usesScript && !project.script) {
@@ -155,7 +156,7 @@ export const generateVideo = inngest.createFunction(
 
     // ---------- 3. Voiceover + subtitles ----------
     let narrationDuration = 0;
-    if (mode.usesScript && settings.voice.enabled) {
+    if (mode.usesScript && settings.voice.enabled && !stock) {
       await step.run("stage-voice", () => setStage(createAdminClient(), projectId, generationId, "generating_voiceover"));
       narrationDuration = await step.run("voiceover", async () => {
         const admin = createAdminClient();
@@ -189,6 +190,8 @@ export const generateVideo = inngest.createFunction(
       const renderJob = await step.run("submit-render", async () => {
         const admin = createAdminClient();
         const renderer = providers.render();
+        // A retry must not see the previous attempt's output as "done".
+        await admin.from("projects").update({ final_video_path: null, thumbnail_path: null }).eq("id", projectId);
         const { data: scenes } = await admin.from("scenes").select("*").eq("project_id", projectId).eq("status", "completed").order("scene_number");
         const { data: p } = await admin.from("projects").select("voiceover_path").eq("id", projectId).single();
         const sign = async (path: string) => {
@@ -198,7 +201,7 @@ export const generateVideo = inngest.createFunction(
         };
         const clips = await Promise.all(((scenes ?? []) as Scene[]).map(async (s) => ({ url: await sign(s.asset_path!), durationSec: Number(s.duration_sec) })));
         const narrationUrl = p?.voiceover_path ? await sign(p.voiceover_path) : undefined;
-        const job = await renderer.submitRender({ clips, narrationUrl, narrationDurationSec: narrationDuration || undefined });
+        const job = await renderer.submitRender({ clips, narrationUrl, narrationDurationSec: narrationDuration || undefined, meta: { projectId, generationId } });
         await admin.from("generations").update({ render_provider: renderer.name, render_model: renderer.model, render_request_id: job.requestId }).eq("id", generationId);
         return { ...job, totalDuration: clips.reduce((t, c) => t + c.durationSec, 0) };
       });
@@ -211,6 +214,7 @@ export const generateVideo = inngest.createFunction(
           const res = await renderer.poll({ requestId: renderJob.requestId, model: renderJob.model });
           if (res.state === "pending") return false;
           if (res.state === "failed") throw new NonRetriableError(`Rendering failed: ${res.error}`);
+          if (renderer.selfPersists) return true; // the render job already stored the video and updated the project
           const finalPath = paths.render(project.user_id, projectId);
           const saved = await copyRemoteToStorage(admin, res.url, finalPath, "video/mp4");
           await admin.from("assets").upsert({ user_id: project.user_id, project_id: projectId, asset_type: "render", storage_path: finalPath, mime_type: saved.contentType, size_bytes: saved.size }, { onConflict: "storage_path" });

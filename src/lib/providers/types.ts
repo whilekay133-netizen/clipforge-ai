@@ -51,6 +51,8 @@ export interface RenderClip { url: string; durationSec: number }
 export interface VideoRenderingProvider {
   readonly name: string;
   readonly model: string;
-  submitRender(input: { clips: RenderClip[]; narrationUrl?: string; narrationDurationSec?: number }): Promise<QueuedJob>;
+  /** True when the renderer stores the finished video and updates the project itself (no download step needed). */
+  readonly selfPersists?: boolean;
+  submitRender(input: { clips: RenderClip[]; narrationUrl?: string; narrationDurationSec?: number; meta?: { projectId: string; generationId: string } }): Promise<QueuedJob>;
   poll(job: QueuedJob): Promise<JobPoll>;
 }

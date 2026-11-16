@@ -1,0 +1,51 @@
+name: Render video
+run-name: render ${{ inputs.generationId }}
+
+# Started by the ClipForge site (GitHub API workflow_dispatch). Free for public repos; uses Actions minutes on private repos.
+on:
+  workflow_dispatch:
+    inputs:
+      projectId:
+        description: Project id
+        required: true
+      generationId:
+        description: Generation id
+        required: true
+
+concurrency:
+  group: render-${{ inputs.generationId }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tools (ffmpeg, subtitle font, Piper voice engine)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          python -m pip install --upgrade pip
+          python -m pip install "piper-tts==1.2.0"
+          cd render && npm install --no-audit --no-fund
+
+      - name: Render
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PROJECT_ID: ${{ inputs.projectId }}
+          GENERATION_ID: ${{ inputs.generationId }}
+        run: node render/render.mjs

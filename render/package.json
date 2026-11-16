@@ -1,0 +1,7 @@
+{
+  "name": "clipforge-render",
+  "private": true,
+  "type": "module",
+  "description": "Free render job: Piper voice + subtitles + ffmpeg, run by GitHub Actions",
+  "dependencies": { "@supabase/supabase-js": "^2.58.0" }
+}

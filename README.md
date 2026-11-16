@@ -87,3 +87,15 @@ npm run build
 - Free-plan watermarking and burned-in captions need a render step that supports overlays, for example Remotion Lambda behind `VideoRenderingProvider`.
 - Rate limiting for enhance and contact is per instance. Back it with Redis or Upstash when you scale.
 - Add Sentry, PostHog and Resend email notifications (PRD §15) once you have keys.
+
+
+## Free video backend (no fal.ai)
+
+When `FAL_KEY` is empty (or `VIDEO_BACKEND=stock`), videos are built from real stock footage instead of AI-generated clips:
+
+1. Claude writes the script and a search phrase for each scene.
+2. `src/lib/providers/stock.ts` finds a clip on Pexels (`PEXELS_API_KEY`) and saves it to Supabase Storage.
+3. `src/lib/providers/stock.ts` (`GithubActionsRenderer`) starts the `render.yml` workflow (`GITHUB_DISPATCH_TOKEN`).
+4. `render/render.mjs` narrates each scene with Piper, burns subtitles, joins the scenes with ffmpeg, uploads `final.mp4` and updates the project. The site notices `projects.final_video_path` and completes the generation.
+
+Setup: add repository secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` on GitHub, and `PEXELS_API_KEY` + `GITHUB_DISPATCH_TOKEN` in Vercel.
