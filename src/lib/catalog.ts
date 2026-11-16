@@ -20,11 +20,11 @@ export const VIDEO_CAPABILITIES = {
   clipLengths: [5, 10] as const,
 };
 
-export const SCRIPTED_DURATIONS = [15, 30, 60, 90, 120, 180];
+export const SCRIPTED_DURATIONS = [5, 15, 30, 60, 90, 120, 180];
 
 export const MODES: ModeDef[] = [
   { id: "faceless", name: "Faceless video", description: "Topic in, narrated video out: script, scenes, voiceover and subtitles.", available: true, usesScript: true, durations: SCRIPTED_DURATIONS },
-  { id: "social", name: "Social media video", description: "Platform presets for Shorts, TikTok, Reels, YouTube, Facebook and LinkedIn.", available: true, usesScript: true, durations: [15, 30, 60, 90] },
+  { id: "social", name: "Social media video", description: "Platform presets for Shorts, TikTok, Reels, YouTube, Facebook and LinkedIn.", available: true, usesScript: true, durations: [5, 15, 30, 60, 90] },
   { id: "storytelling", name: "AI storytelling", description: "Title, story, characters and scenes narrated as a short film.", available: true, usesScript: true, durations: SCRIPTED_DURATIONS },
   { id: "text_to_video", name: "Text-to-video", description: "Describe one shot and get a single generated clip.", available: true, usesScript: false, durations: [5, 10] },
   { id: "image_to_video", name: "Image-to-video", description: "Animate an uploaded image with camera movement.", available: false, usesScript: false, durations: [5, 10] },
