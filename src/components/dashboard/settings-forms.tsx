@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Alert } from "@/components/ui/misc";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function ProfileForm({ fullName, email }: { fullName: string; email: string }) {
   const router = useRouter();
@@ -48,8 +49,8 @@ export function PasswordForm() {
     }}>
       {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div><Label htmlFor="password">New password</Label><Input id="password" name="password" type="password" autoComplete="new-password" required /></div>
-        <div><Label htmlFor="confirm">Confirm</Label><Input id="confirm" name="confirm" type="password" autoComplete="new-password" required /></div>
+        <div><Label htmlFor="password">New password</Label><PasswordInput id="password" name="password" autoComplete="new-password" required /></div>
+        <div><Label htmlFor="confirm">Confirm</Label><PasswordInput id="confirm" name="confirm" autoComplete="new-password" required /></div>
       </div>
       <Button variant="secondary" disabled={saving}>{saving ? "Updating…" : "Update password"}</Button>
     </form>

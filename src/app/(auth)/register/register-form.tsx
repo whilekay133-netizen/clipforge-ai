@@ -7,6 +7,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Alert } from "@/components/ui/misc";
 import { Divider, GoogleButton } from "@/components/auth/google-button";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export function RegisterForm() {
         {error && <Alert tone="danger">{error}</Alert>}
         <div><Label htmlFor="full_name">Full name</Label><Input id="full_name" name="full_name" autoComplete="name" required maxLength={120} /></div>
         <div><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" autoComplete="email" required /></div>
-        <div><Label htmlFor="password">Password</Label><Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required /></div>
+        <div><Label htmlFor="password">Password</Label><PasswordInput id="password" name="password" autoComplete="new-password" minLength={8} required /></div>
         <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creating account…" : "Create account"}</Button>
         <p className="text-center text-xs text-muted">By signing up you agree to our <Link href="/terms" className="underline">Terms</Link>, <Link href="/privacy" className="underline">Privacy policy</Link> and <Link href="/content-policy" className="underline">Content policy</Link>.</p>
       </form>

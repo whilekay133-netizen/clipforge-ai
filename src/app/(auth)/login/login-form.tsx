@@ -7,6 +7,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Alert } from "@/components/ui/misc";
 import { Divider, GoogleButton } from "@/components/auth/google-button";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const ERRORS: Record<string, string> = {
   auth_callback: "That sign-in link is invalid or expired. Please try again.",
@@ -47,7 +48,7 @@ export function LoginForm() {
         <div><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" autoComplete="email" required /></div>
         <div>
           <div className="flex items-center justify-between"><Label htmlFor="password">Password</Label><Link href="/forgot-password" className="mb-1.5 text-xs text-brand-soft hover:underline">Forgot?</Link></div>
-          <Input id="password" name="password" type="password" autoComplete="current-password" required />
+          <PasswordInput id="password" name="password" autoComplete="current-password" required />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>{loading ? "Signing in…" : "Log in"}</Button>
       </form>
