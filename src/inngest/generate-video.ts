@@ -18,7 +18,7 @@ export const generateVideo = inngest.createFunction(
   {
     id: "generate-video",
     retries: 3,
-    concurrency: [{ key: "event.data.userId", limit: 2 }, { limit: 25 }],
+    concurrency: [{ key: "event.data.userId", limit: 2 }, { limit: 5 }],
     cancelOn: [{ event: "video/generate.cancelled", match: "data.generationId" }],
     onFailure: async ({ event, error }) => {
       const data = event.data.event.data;
